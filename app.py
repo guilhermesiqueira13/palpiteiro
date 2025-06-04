@@ -12,8 +12,14 @@ modelo = joblib.load('modelo_over25_final_model.pkl')
 scaler = joblib.load('scaler.pkl')
 
 # Times usados no treinamento
+# Times disponíveis no modelo treinado
 times_disponiveis = [
-    'Gremio', 'Botafogo', 'Cuiaba', 'Fluminense', 'Bahia', 'Atletico Goianiense'
+    "Gremio",
+    "Botafogo",
+    "Cuiaba",
+    "Fluminense",
+    "Bahia",
+    "Atletico Goianiense",
 ]
 
 @app.route('/predict', methods=['POST'])
@@ -36,7 +42,8 @@ def prever():
         if f'away_{time_visitante}' in linha:
             linha[f'away_{time_visitante}'] = 1
 
-        df = pd.DataFrame([linha])
+        # Garante que as colunas estejam na mesma ordem do scaler
+        df = pd.DataFrame([linha], columns=scaler.feature_names_in_)
         df_scaled = scaler.transform(df)
         prob = modelo.predict_proba(df_scaled)[0][1]
 
@@ -51,5 +58,3 @@ def prever():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-print(scaler.feature_names_in_)

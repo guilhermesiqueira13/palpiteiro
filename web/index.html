@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Previsão Over 2.5 Gols</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h2>Previsão Over 2.5 Gols</h2>
+    <label for="home">Time Mandante:</label>
+    <select id="home">
+      <option>Gremio</option>
+      <option>Botafogo</option>
+      <option>Cuiaba</option>
+      <option>Fluminense</option>
+      <option>Bahia</option>
+      <option>Atletico Goianiense</option>
+      <!-- Adicione mais times -->
+    </select>
+
+    <label for="away">Time Visitante:</label>
+    <select id="away">
+      <option>Botafogo</option>
+      <option>Gremio</option>
+      <option>Fluminense</option>
+      <option>Cuiaba</option>
+      <option>Bahia</option>
+      <option>Atletico Goianiense</option>
+      <!-- Adicione mais times -->
+    </select>
+
+    <button onclick="verificarProbabilidade()">Ver Probabilidade</button>
+
+    <div class="result" id="resultado"></div>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+
+</html>

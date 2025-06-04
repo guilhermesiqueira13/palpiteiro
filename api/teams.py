@@ -2,8 +2,9 @@ import json
 import os
 import sys
 
-# Garante que utils.py (no mesmo diretório) seja importado corretamente
+# Garante que o Python procure utils.py no mesmo diretório
 sys.path.append(os.path.dirname(__file__))
+
 try:
     from utils import times_disponiveis
 except Exception as e:
@@ -13,7 +14,7 @@ except Exception as e:
 
 
 def handler(request, response):
-    # Se falhou ao importar utils, retorna 500 em JSON
+    # Se falhou ao importar utils, devolve 500 em JSON
     if times_disponiveis is None:
         response.set_status(500)
         response.set_header("Content-Type", "application/json")
@@ -23,14 +24,14 @@ def handler(request, response):
         }))
         return
 
-    # Permite somente GET
+    # Aceita apenas GET
     if request.method != "GET":
         response.set_status(405)
         response.set_header("Content-Type", "application/json")
         response.send(json.dumps({"erro": "Método não permitido"}))
         return
 
-    # Retorna a lista de times
+    # Retorna a lista de times em JSON
     response.set_status(200)
     response.set_header("Content-Type", "application/json")
     response.send(json.dumps(times_disponiveis))

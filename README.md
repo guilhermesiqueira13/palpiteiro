@@ -12,5 +12,5 @@ Aplicação simples em Flask que fornece a probabilidade de uma partida ter mais
    ```bash
    python app.py
    ```
-3. Abra o arquivo `web/index.html` em um navegador para testar a aplicação.
+3. Acesse `http://localhost:5000` em um navegador para testar a aplicação.
 

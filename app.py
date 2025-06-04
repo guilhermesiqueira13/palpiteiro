@@ -4,7 +4,7 @@ import pandas as pd
 import joblib
 
 # Inicializar app Flask
-app = Flask(__name__)
+app = Flask(__name__, static_folder='web', static_url_path='')
 CORS(app, resources={r"/*": {"origins": "*"}})  # Libera CORS para tudo
 
 # Carregar modelo e scaler
@@ -21,6 +21,11 @@ times_disponiveis = [
     "Bahia",
     "Atletico Goianiense",
 ]
+
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
 
 @app.route('/predict', methods=['POST'])
 def prever():

@@ -40,3 +40,26 @@ async function verificarProbabilidade() {
   }
 }
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const homeSelect = document.getElementById("home");
+  const awaySelect = document.getElementById("away");
+
+  try {
+    const res = await fetch("/teams");
+    const teams = await res.json();
+    teams.forEach((t) => {
+      const optHome = document.createElement("option");
+      optHome.value = t;
+      optHome.textContent = t;
+      homeSelect.appendChild(optHome);
+
+      const optAway = document.createElement("option");
+      optAway.value = t;
+      optAway.textContent = t;
+      awaySelect.appendChild(optAway);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar times", err);
+  }
+});
+

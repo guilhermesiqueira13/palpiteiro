@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import traceback
 
 # Garante que o Python procure utils.py no mesmo diretório
 sys.path.append(os.path.dirname(__file__))
@@ -9,7 +10,6 @@ try:
     from utils import times_disponiveis
 except Exception as e:
     times_disponiveis = None
-    import traceback
     traceback_str = traceback.format_exc()
 
 

@@ -28,7 +28,7 @@ async function verificarProbabilidade() {
     if (res.ok && data?.probabilidade != null) {
       resultado.textContent = `Probabilidade de Over 2.5 gols: ${(
         data.probabilidade * 100
-      ).toFixed(2)}% (baseado em ${data.confrontos_utilizados} jogos)`;
+      ).toFixed(2)}% (baseado nos últimos ${data.confrontos_utilizados} jogos)`;
       resultado.style.color = "green";
     } else {
       resultado.textContent = "Erro na resposta da API.";
@@ -62,4 +62,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erro ao carregar times", err);
   }
 });
-

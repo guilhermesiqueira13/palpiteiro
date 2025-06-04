@@ -1,9 +1,9 @@
+// public/script.js
 async function verificarProbabilidade() {
   const home = document.getElementById("home").value;
   const away = document.getElementById("away").value;
   const resultado = document.getElementById("resultado");
 
-  // Elementos do botão para animação de loading
   const botao = document.getElementById("btn-check");
   const btnText = document.getElementById("btn-text");
   const loadingContainer = document.getElementById("loading-container");
@@ -14,29 +14,21 @@ async function verificarProbabilidade() {
     return;
   }
 
-  // Guarda os valores que serão exibidos após o delay
+  // Inicia animação
+  const startTime = Date.now();
+  resultado.textContent = "";
+  btnText.hidden = true;
+  loadingContainer.removeAttribute("hidden");
+  botao.disabled = true;
+
   let finalText = "";
   let finalColor = "black";
-
-  // Marca o início do carregamento
-  const startTime = Date.now();
-
-  // ===== Inicia animação de “Calculando...” com 3 dots =====
-  resultado.textContent = ""; // limpa texto anterior
-  btnText.hidden = true; // esconde “Ver Probabilidade”
-  loadingContainer.removeAttribute("hidden"); // mostra “Calculando” + dots
-  botao.disabled = true; // desabilita o botão enquanto carrega
 
   try {
     const res = await fetch("/predict", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        time_mandante: home,
-        time_visitante: away,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ time_mandante: home, time_visitante: away }),
     });
 
     const data = await res.json();
@@ -52,8 +44,8 @@ async function verificarProbabilidade() {
     finalText = "Erro ao conectar à API.";
     finalColor = "red";
   } finally {
-    // ===== Garante que o loading complete pelo menos 1 ciclo de 1s =====
-    const animationDuration = 1000; // duração de um ciclo em milissegundos
+    // Garante ciclo completo de 1s de loading
+    const animationDuration = 1000;
     const elapsed = Date.now() - startTime;
     const remainder =
       (animationDuration - (elapsed % animationDuration)) % animationDuration;
@@ -61,14 +53,14 @@ async function verificarProbabilidade() {
       await new Promise((r) => setTimeout(r, remainder));
     }
 
-    // ===== Após o delay, exibe o resultado (texto e cor) =====
+    // Exibe resultado somente após o loading terminar
     resultado.textContent = finalText;
     resultado.style.color = finalColor;
 
-    // ===== Para animação e restaura botão =====
+    // Para a animação e restaura botão
     loadingContainer.setAttribute("hidden", "");
-    btnText.hidden = false; // mostra “Ver Probabilidade” novamente
-    botao.disabled = false; // reabilita o botão
+    btnText.hidden = false;
+    botao.disabled = false;
   }
 }
 

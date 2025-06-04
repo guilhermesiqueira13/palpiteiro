@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/teams",
+      "dest": "/api/teams.py",
+      "methods": ["GET"]
+    },
+    {
+      "src": "/predict",
+      "dest": "/api/predict.py",
+      "methods": ["POST"]
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 # Palpiteiro
 
 Aplicação simples em Flask que fornece a probabilidade de uma partida ter mais de 2,5 gols.
+As probabilidades são calculadas com base no histórico de confrontos presente em `dados_futebol.csv`,
+sem utilização de modelos de aprendizado de máquina.
 
 ## Como executar
 

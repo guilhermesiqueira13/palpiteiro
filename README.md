@@ -12,7 +12,7 @@ sem utilização de modelos de aprendizado de máquina.
    ```
 2. Inicie a API:
    ```bash
-   python app.py
+   python api/app.py
    ```
 3. Acesse `http://localhost:5000` em um navegador para testar a aplicação.
 

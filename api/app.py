@@ -4,7 +4,11 @@ import csv
 from collections import defaultdict
 
 # Inicializar app Flask
-app = Flask(__name__, static_folder='web', static_url_path='')
+import os
+
+# Usar a pasta "public" para os arquivos estáticos
+BASE_DIR = os.path.dirname(__file__)
+app = Flask(__name__, static_folder=os.path.join(BASE_DIR, 'public'), static_url_path='')
 CORS(app, resources={r"/*": {"origins": "*"}})  # Libera CORS para tudo
 
 
@@ -12,7 +16,8 @@ CORS(app, resources={r"/*": {"origins": "*"}})  # Libera CORS para tudo
 historico = defaultdict(lambda: [0, 0])  # (total_jogos, overs)
 times_disponiveis = set()
 
-with open('dados_futebol.csv', newline='', encoding='utf-8') as csvfile:
+csv_path = os.path.join(BASE_DIR, 'dados_futebol.csv')
+with open(csv_path, newline='', encoding='utf-8') as csvfile:
     reader = csv.reader(csvfile, delimiter=';')
     cabecalho = next(reader, None)  # pula cabecalho
     for row in reader:

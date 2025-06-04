@@ -1,13 +1,36 @@
-# api/teams.py
 import json
-from .utils import times_disponiveis  # importa a lista já ordenada
+import os
+import sys
+
+# Garante que utils.py (no mesmo diretório) seja importado corretamente
+sys.path.append(os.path.dirname(__file__))
+try:
+    from utils import times_disponiveis
+except Exception as e:
+    times_disponiveis = None
+    import traceback
+    traceback_str = traceback.format_exc()
+
 
 def handler(request, response):
-    """
-    Retorna a lista de times em JSON.
-    Será chamado quando o front fizer GET /teams
-    """
-    # Monta a resposta
+    # Se falhou ao importar utils, retorna 500 em JSON
+    if times_disponiveis is None:
+        response.set_status(500)
+        response.set_header("Content-Type", "application/json")
+        response.send(json.dumps({
+            "erro": "Falha ao carregar dados dos times.",
+            "detalhes": traceback_str
+        }))
+        return
+
+    # Permite somente GET
+    if request.method != "GET":
+        response.set_status(405)
+        response.set_header("Content-Type", "application/json")
+        response.send(json.dumps({"erro": "Método não permitido"}))
+        return
+
+    # Retorna a lista de times
     response.set_status(200)
     response.set_header("Content-Type", "application/json")
     response.send(json.dumps(times_disponiveis))

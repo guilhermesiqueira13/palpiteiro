@@ -1,14 +1,29 @@
-# api/predict.py
 import json
-from .utils import historico
+import os
+import sys
+
+# Garante que utils.py (no mesmo diretório) seja importado corretamente
+sys.path.append(os.path.dirname(__file__))
+try:
+    from utils import historico
+except Exception as e:
+    historico = None
+    import traceback
+    tb_utils = traceback.format_exc()
+
 
 def handler(request, response):
-    """
-    Retorna JSON com { probabilidade, confrontos_utilizados }.
-    Será chamado quando o front fizer POST /predict
-    """
+    # Se falhou ao importar utils, retorna 500 em JSON
+    if historico is None:
+        response.set_status(500)
+        response.set_header("Content-Type", "application/json")
+        response.send(json.dumps({
+            "erro": "Falha ao carregar histórico.",
+            "detalhes": tb_utils
+        }))
+        return
 
-    # Permitir apenas método POST
+    # Só aceita POST
     if request.method != "POST":
         response.set_status(405)
         response.set_header("Content-Type", "application/json")
@@ -47,8 +62,10 @@ def handler(request, response):
             "confrontos_utilizados": int(confrontos_utilizados)
         }))
     except Exception as e:
-        # Qualquer erro interno
-        print("Erro interno em /predict:", e)
+        tb = traceback.format_exc()
         response.set_status(500)
         response.set_header("Content-Type", "application/json")
-        response.send(json.dumps({"erro": "Erro interno no servidor"}))
+        response.send(json.dumps({
+            "erro": "Erro interno no servidor",
+            "detalhes": tb
+        }))

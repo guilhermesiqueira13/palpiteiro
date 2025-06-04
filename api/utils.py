@@ -1,4 +1,3 @@
-# api/utils.py
 import os
 import csv
 from collections import defaultdict
@@ -7,7 +6,7 @@ from collections import defaultdict
 BASE_DIR = os.path.dirname(__file__)
 
 # Caminho completo do CSV dentro de api/
-CSV_PATH = os.path.join(BASE_DIR, "dados_futebol.csv")
+CSV_PATH = os.path.join(BASE_DIR, "./dados_futebol.csv")
 
 # historico[(mandante, visitante)] = [total_jogos, overs_count]
 historico = defaultdict(lambda: [0, 0])

@@ -70,6 +70,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const res = await fetch("/teams");
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || `Status ${res.status}`);
+    }
     const teams = await res.json();
     teams.forEach((t) => {
       const optHome = document.createElement("option");

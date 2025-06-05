@@ -1,20 +1,17 @@
 import json
 import os
 import sys
-import traceback
 
-# Garante que o Python procure utils.py no mesmo diretório
 sys.path.append(os.path.dirname(__file__))
-
 try:
     from utils import historico
 except Exception as e:
     historico = None
+    import traceback
     tb_utils = traceback.format_exc()
 
-
 def handler(request, response):
-    # Se falhou ao importar utils, devolve 500 em JSON
+    # Se utils falhar
     if historico is None:
         response.set_status(500)
         response.set_header("Content-Type", "application/json")
@@ -24,7 +21,7 @@ def handler(request, response):
         }))
         return
 
-    # Aceita apenas POST
+    # Só POST permitido
     if request.method != "POST":
         response.set_status(405)
         response.set_header("Content-Type", "application/json")
@@ -32,11 +29,10 @@ def handler(request, response):
         return
 
     try:
-        dados = request.json  # já vem como dict Python
+        dados = request.json
         time_mandante = dados.get("time_mandante")
         time_visitante = dados.get("time_visitante")
 
-        # Validações básicas
         if not time_mandante or not time_visitante or time_mandante == time_visitante:
             response.set_status(400)
             response.set_header("Content-Type", "application/json")
@@ -48,21 +44,21 @@ def handler(request, response):
 
         if total > 0:
             prob = overs / total
-            confrontos_utilizados = total
+            usados = total
         else:
-            # Se não houve confrontos diretos, usar média geral
             total_geral = sum(v[0] for v in historico.values())
             overs_geral = sum(v[1] for v in historico.values())
             prob = (overs_geral / total_geral) if total_geral else 0.0
-            confrontos_utilizados = 0
+            usados = 0
 
         response.set_status(200)
         response.set_header("Content-Type", "application/json")
         response.send(json.dumps({
             "probabilidade": float(prob),
-            "confrontos_utilizados": int(confrontos_utilizados)
+            "confrontos_utilizados": int(usados)
         }))
     except Exception as e:
+        import traceback
         tb = traceback.format_exc()
         response.set_status(500)
         response.set_header("Content-Type", "application/json")

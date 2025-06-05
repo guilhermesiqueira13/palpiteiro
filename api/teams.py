@@ -1,20 +1,18 @@
 import json
 import os
 import sys
-import traceback
 
-# Garante que o Python procure utils.py no mesmo diretório
+# Ajusta path para importar utils.py
 sys.path.append(os.path.dirname(__file__))
-
 try:
     from utils import times_disponiveis
 except Exception as e:
     times_disponiveis = None
+    import traceback
     traceback_str = traceback.format_exc()
 
-
 def handler(request, response):
-    # Se falhou ao importar utils, devolve 500 em JSON
+    # Se utils falhar, devolve 500 em JSON
     if times_disponiveis is None:
         response.set_status(500)
         response.set_header("Content-Type", "application/json")
@@ -24,14 +22,13 @@ def handler(request, response):
         }))
         return
 
-    # Aceita apenas GET
+    # Só GET permitido
     if request.method != "GET":
         response.set_status(405)
         response.set_header("Content-Type", "application/json")
         response.send(json.dumps({"erro": "Método não permitido"}))
         return
 
-    # Retorna a lista de times em JSON
     response.set_status(200)
     response.set_header("Content-Type", "application/json")
     response.send(json.dumps(times_disponiveis))

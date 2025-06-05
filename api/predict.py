@@ -9,6 +9,7 @@ from utils import historico
 app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
+@app.route("/predict", methods=["POST"])
 def predict():
     try:
         # Tenta pegar os dados JSON da requisição

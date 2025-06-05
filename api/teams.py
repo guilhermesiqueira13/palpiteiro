@@ -2,8 +2,7 @@ import json
 import os
 import sys
 
-# Ajusta path para importar utils.py
-sys.path.append(os.path.dirname(__file__))
+# Garante que Python ache utils.py neste mesmo diretório\sys.path.append(os.path.dirname(__file__))
 try:
     from utils import times_disponiveis
 except Exception as e:
@@ -11,8 +10,9 @@ except Exception as e:
     import traceback
     traceback_str = traceback.format_exc()
 
+
 def handler(request, response):
-    # Se utils falhar, devolve 500 em JSON
+    # Se falhou ao importar ou utils.py não carregou, devolve 500 em JSON
     if times_disponiveis is None:
         response.set_status(500)
         response.set_header("Content-Type", "application/json")
@@ -22,13 +22,14 @@ def handler(request, response):
         }))
         return
 
-    # Só GET permitido
+    # Permite apenas GET /teams
     if request.method != "GET":
         response.set_status(405)
         response.set_header("Content-Type", "application/json")
         response.send(json.dumps({"erro": "Método não permitido"}))
         return
 
+    # Retorna a lista de times em JSON
     response.set_status(200)
     response.set_header("Content-Type", "application/json")
     response.send(json.dumps(times_disponiveis))

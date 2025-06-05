@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-sys.path.append(os.path.dirname(__file__))
+# Garante que Python ache utils.py neste mesmo diretório\sys.path.append(os.path.dirname(__file__))
 try:
     from utils import historico
 except Exception as e:
@@ -10,8 +10,9 @@ except Exception as e:
     import traceback
     tb_utils = traceback.format_exc()
 
+
 def handler(request, response):
-    # Se utils falhar
+    # Se falhou ao importar utils, devolve 500 em JSON
     if historico is None:
         response.set_status(500)
         response.set_header("Content-Type", "application/json")
@@ -21,7 +22,7 @@ def handler(request, response):
         }))
         return
 
-    # Só POST permitido
+    # Permite apenas POST /predict
     if request.method != "POST":
         response.set_status(405)
         response.set_header("Content-Type", "application/json")
@@ -29,10 +30,11 @@ def handler(request, response):
         return
 
     try:
-        dados = request.json
+        dados = request.json  # já vem como dict Python
         time_mandante = dados.get("time_mandante")
         time_visitante = dados.get("time_visitante")
 
+        # Validação básica: não permitir nomes vazios nem igual
         if not time_mandante or not time_visitante or time_mandante == time_visitante:
             response.set_status(400)
             response.set_header("Content-Type", "application/json")
@@ -44,18 +46,19 @@ def handler(request, response):
 
         if total > 0:
             prob = overs / total
-            usados = total
+            confrontos_utilizados = total
         else:
+            # Se não houve confrontos diretos,
             total_geral = sum(v[0] for v in historico.values())
             overs_geral = sum(v[1] for v in historico.values())
             prob = (overs_geral / total_geral) if total_geral else 0.0
-            usados = 0
+            confrontos_utilizados = 0
 
         response.set_status(200)
         response.set_header("Content-Type", "application/json")
         response.send(json.dumps({
             "probabilidade": float(prob),
-            "confrontos_utilizados": int(usados)
+            "confrontos_utilizados": int(confrontos_utilizados)
         }))
     except Exception as e:
         import traceback

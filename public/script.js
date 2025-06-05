@@ -1,4 +1,3 @@
-// public/script.js
 async function verificarProbabilidade() {
   const home = document.getElementById("home").value;
   const away = document.getElementById("away").value;
@@ -14,7 +13,7 @@ async function verificarProbabilidade() {
     return;
   }
 
-  // Inicia animação
+  // Inicia animação de loading
   const startTime = Date.now();
   resultado.textContent = "";
   btnText.hidden = true;
@@ -25,26 +24,30 @@ async function verificarProbabilidade() {
   let finalColor = "black";
 
   try {
+    // Requisição para /predict (serverless Python)
     const res = await fetch("/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ time_mandante: home, time_visitante: away }),
     });
 
-    const data = await res.json();
-    if (res.ok && data?.probabilidade != null) {
-      const prob = (data.probabilidade * 100).toFixed(2);
-      finalText = `Probabilidade de Over 2.5 gols: ${prob}% (baseado nos últimos ${data.confrontos_utilizados} jogos)`;
+    const payload = await res.json();
+    if (res.ok && payload.probabilidade != null) {
+      const prob = (payload.probabilidade * 100).toFixed(2);
+      finalText = `Probabilidade de Over 2.5 gols: ${prob}% (baseado nos últimos ${payload.confrontos_utilizados} jogos)`;
       finalColor = "green";
     } else {
-      finalText = "Erro na resposta da API.";
+      const erroMsg = payload.erro || "Erro na resposta da API.";
+      finalText = `Erro: ${erroMsg}`;
       finalColor = "red";
+      console.error("Payload de erro do predict:", payload);
     }
   } catch (err) {
     finalText = "Erro ao conectar à API.";
     finalColor = "red";
+    console.error("Exceção no fetch /predict:", err);
   } finally {
-    // Garante ciclo completo de 1s de loading
+    // Garante que o loading fique visível por pelo menos 1s
     const animationDuration = 1000;
     const elapsed = Date.now() - startTime;
     const remainder =
@@ -53,11 +56,11 @@ async function verificarProbabilidade() {
       await new Promise((r) => setTimeout(r, remainder));
     }
 
-    // Exibe resultado somente após o loading terminar
+    // Exibe o resultado ou erro
     resultado.textContent = finalText;
     resultado.style.color = finalColor;
 
-    // Para a animação e restaura botão
+    // Finaliza animação e restaura botão
     loadingContainer.setAttribute("hidden", "");
     btnText.hidden = false;
     botao.disabled = false;
@@ -67,26 +70,32 @@ async function verificarProbabilidade() {
 document.addEventListener("DOMContentLoaded", async () => {
   const homeSelect = document.getElementById("home");
   const awaySelect = document.getElementById("away");
+  const resultado = document.getElementById("resultado");
 
   try {
     const res = await fetch("/teams");
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(txt || `Status ${res.status}`);
-    }
-    const teams = await res.json();
-    teams.forEach((t) => {
-      const optHome = document.createElement("option");
-      optHome.value = t;
-      optHome.textContent = t;
-      homeSelect.appendChild(optHome);
+    const payload = await res.json();
 
-      const optAway = document.createElement("option");
-      optAway.value = t;
-      optAway.textContent = t;
-      awaySelect.appendChild(optAway);
-    });
+    if (res.ok && Array.isArray(payload)) {
+      payload.forEach((t) => {
+        const o1 = document.createElement("option");
+        o1.value = t;
+        o1.textContent = t;
+        homeSelect.appendChild(o1);
+
+        const o2 = document.createElement("option");
+        o2.value = t;
+        o2.textContent = t;
+        awaySelect.appendChild(o2);
+      });
+    } else {
+      console.error("Payload inesperado de /teams:", payload);
+      resultado.textContent = "Erro ao carregar times.";
+      resultado.style.color = "red";
+    }
   } catch (err) {
-    console.error("Erro ao carregar times", err);
+    console.error("Erro ao conectar em /teams:", err);
+    resultado.textContent = "Erro ao carregar times.";
+    resultado.style.color = "red";
   }
 });

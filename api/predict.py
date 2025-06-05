@@ -1,17 +1,18 @@
+# api/predict.py
+
 import json
 import os
 import sys
+import traceback
 
-# Garante que o Python procure utils.py no mesmo diretório
+# Garante que o Python procure utils.py no mesmo diretório deste arquivo
 sys.path.append(os.path.dirname(__file__))
 
 try:
     from utils import historico
 except Exception as e:
     historico = None
-    import traceback
     tb_utils = traceback.format_exc()
-
 
 def handler(request, response):
     # Se falhou ao importar utils, devolve 500 em JSON

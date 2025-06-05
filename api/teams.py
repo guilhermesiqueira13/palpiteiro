@@ -1,8 +1,12 @@
+# api/teams.py
+
 import json
 import os
 import sys
 
-# Garante que Python ache utils.py neste mesmo diretório\sys.path.append(os.path.dirname(__file__))
+# Garante que o Python procure utils.py no mesmo diretório deste arquivo
+sys.path.append(os.path.dirname(__file__))
+
 try:
     from utils import times_disponiveis
 except Exception as e:
@@ -12,7 +16,7 @@ except Exception as e:
 
 
 def handler(request, response):
-    # Se falhou ao importar ou utils.py não carregou, devolve 500 em JSON
+    # Se falhou ao importar utils.py, devolve 500 em JSON
     if times_disponiveis is None:
         response.set_status(500)
         response.set_header("Content-Type", "application/json")
@@ -22,7 +26,7 @@ def handler(request, response):
         }))
         return
 
-    # Permite apenas GET /teams
+    # Permite apenas GET /api/teams
     if request.method != "GET":
         response.set_status(405)
         response.set_header("Content-Type", "application/json")

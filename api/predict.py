@@ -1,73 +1,55 @@
 # api/predict.py
-
-import json
 import os
 import sys
-import traceback
+from flask import Flask, request, jsonify
 
-# Garante que o Python procure utils.py no mesmo diretório deste arquivo
 sys.path.append(os.path.dirname(__file__))
 
 try:
     from utils import historico
 except Exception as e:
     historico = None
-    tb_utils = traceback.format_exc()
+    import traceback
+    traceback_str = traceback.format_exc()
 
-def handler(request, response):
-    # Se falhou ao importar utils, devolve 500 em JSON
+app = Flask(__name__)
+
+@app.route("/", methods=["POST"])
+def predict():
+    # Se histório não carregou, devolve erro
     if historico is None:
-        response.set_status(500)
-        response.set_header("Content-Type", "application/json")
-        response.send(json.dumps({
-            "erro": "Falha ao carregar histórico.",
-            "detalhes": tb_utils
-        }))
-        return
+        return (
+            jsonify({
+                "erro": "Falha ao carregar histórico.",
+                "detalhes": traceback_str
+            }),
+            500,
+        )
 
-    # Aceita apenas POST
-    if request.method != "POST":
-        response.set_status(405)
-        response.set_header("Content-Type", "application/json")
-        response.send(json.dumps({"erro": "Método não permitido"}))
-        return
+    data = request.get_json(silent=True) or {}
+    time_mandante = data.get("time_mandante")
+    time_visitante = data.get("time_visitante")
 
-    try:
-        dados = request.json  # já vem como dict Python
-        time_mandante = dados.get("time_mandante")
-        time_visitante = dados.get("time_visitante")
+    # Validações básicas
+    if not time_mandante or not time_visitante or time_mandante == time_visitante:
+        return jsonify({"erro": "Times inválidos."}), 400
 
-        # Validações básicas
-        if not time_mandante or not time_visitante or time_mandante == time_visitante:
-            response.set_status(400)
-            response.set_header("Content-Type", "application/json")
-            response.send(json.dumps({"erro": "Times inválidos."}))
-            return
+    chave = (time_mandante, time_visitante)
+    total, overs = historico.get(chave, (0, 0))
 
-        chave = (time_mandante, time_visitante)
-        total, overs = historico.get(chave, (0, 0))
+    if total > 0:
+        prob = overs / total
+        confrontos_utilizados = total
+    else:
+        # Se não houve confrontos diretos, usa média geral
+        total_geral = sum(v[0] for v in historico.values())
+        overs_geral = sum(v[1] for v in historico.values())
+        prob = (overs_geral / total_geral) if total_geral else 0.0
+        confrontos_utilizados = 0
 
-        if total > 0:
-            prob = overs / total
-            confrontos_utilizados = total
-        else:
-            # Se não houve confrontos diretos, usar média geral
-            total_geral = sum(v[0] for v in historico.values())
-            overs_geral = sum(v[1] for v in historico.values())
-            prob = (overs_geral / total_geral) if total_geral else 0.0
-            confrontos_utilizados = 0
+    return jsonify({
+        "probabilidade": float(prob),
+        "confrontos_utilizados": int(confrontos_utilizados)
+    })
 
-        response.set_status(200)
-        response.set_header("Content-Type", "application/json")
-        response.send(json.dumps({
-            "probabilidade": float(prob),
-            "confrontos_utilizados": int(confrontos_utilizados)
-        }))
-    except Exception as e:
-        tb = traceback.format_exc()
-        response.set_status(500)
-        response.set_header("Content-Type", "application/json")
-        response.send(json.dumps({
-            "erro": "Erro interno no servidor",
-            "detalhes": tb
-        }))
+# Expõe o app Flask

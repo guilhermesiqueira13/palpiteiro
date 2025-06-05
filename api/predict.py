@@ -2,7 +2,9 @@ import json
 import os
 import sys
 
-# Garante que Python ache utils.py neste mesmo diretório\sys.path.append(os.path.dirname(__file__))
+# Garante que o Python procure utils.py no mesmo diretório
+sys.path.append(os.path.dirname(__file__))
+
 try:
     from utils import historico
 except Exception as e:
@@ -22,7 +24,7 @@ def handler(request, response):
         }))
         return
 
-    # Permite apenas POST /predict
+    # Aceita apenas POST
     if request.method != "POST":
         response.set_status(405)
         response.set_header("Content-Type", "application/json")
@@ -34,7 +36,7 @@ def handler(request, response):
         time_mandante = dados.get("time_mandante")
         time_visitante = dados.get("time_visitante")
 
-        # Validação básica: não permitir nomes vazios nem igual
+        # Validações básicas
         if not time_mandante or not time_visitante or time_mandante == time_visitante:
             response.set_status(400)
             response.set_header("Content-Type", "application/json")
@@ -48,7 +50,7 @@ def handler(request, response):
             prob = overs / total
             confrontos_utilizados = total
         else:
-            # Se não houve confrontos diretos,
+            # Se não houve confrontos diretos, usar média geral
             total_geral = sum(v[0] for v in historico.values())
             overs_geral = sum(v[1] for v in historico.values())
             prob = (overs_geral / total_geral) if total_geral else 0.0
@@ -61,7 +63,6 @@ def handler(request, response):
             "confrontos_utilizados": int(confrontos_utilizados)
         }))
     except Exception as e:
-        import traceback
         tb = traceback.format_exc()
         response.set_status(500)
         response.set_header("Content-Type", "application/json")

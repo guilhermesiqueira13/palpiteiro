@@ -5,8 +5,18 @@ from collections import defaultdict
 # A pasta onde este arquivo .py está localizado
 BASE_DIR = os.path.dirname(__file__)
 
-# Caminho completo do CSV dentro de api/
+# Caminho completo do CSV. Em ambientes como o Vercel, o arquivo pode ficar em
+# um diretório diferente dependendo de como a função foi empacotada. Primeiro
+# tenta-se ler no mesmo diretório deste arquivo; caso não exista, procura dentro
+# de um subdiretório "api" (mantém compatibilidade com execuções locais e em
+# serverless).
 CSV_PATH = os.path.join(BASE_DIR, "dados_futebol.csv")
+if not os.path.exists(CSV_PATH):
+    alt_path = os.path.join(BASE_DIR, "api", "dados_futebol.csv")
+    if os.path.exists(alt_path):
+        CSV_PATH = alt_path
+    else:
+        raise FileNotFoundError(f"dados_futebol.csv não encontrado em {CSV_PATH} ou {alt_path}")
 
 # historico[(mandante, visitante)] = [total_jogos, overs_count]
 historico = defaultdict(lambda: [0, 0])
